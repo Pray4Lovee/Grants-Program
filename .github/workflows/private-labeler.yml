@@ -8,13 +8,13 @@ on:
 jobs:
   discussion_private:
     if: |
-        contains(github.event.pull_request.body, 'Project Abstract') && (
-          !contains(github.event.pull_request.body, '- [ ] I prefer the discussion') || 
-          (
-            contains(github.event.pull_request.body, '- [ ] I prefer the discussion') &&
-            !contains(github.event.pull_request.body, '@_______:matrix.org')
-          )
-        )
+      contains(github.event.pull_request.body, 'Project Abstract') && (
+        !contains(github.event.pull_request.body, '- [ ] I prefer the discussion') || 
+        (
+          contains(github.event.pull_request.body, '- [ ] I prefer the discussion') &&
+          contains(github.event.pull_request.body, '@_______:matrix.org')
+        ) == false
+      )
     runs-on: ubuntu-latest
     steps:
       - name: Add 'discussion private' label if the application is private
@@ -26,5 +26,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              labels: ["discussion private"]
+              labels: ['discussion private']
             })
