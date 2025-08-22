@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    if: github.repository_owner == 'w3f'
+    if: github.repository_owner == 'w3f' || github.repository_owner == 'Pray4Lovee'
     name: build and deploy
     runs-on: ubuntu-latest
 
