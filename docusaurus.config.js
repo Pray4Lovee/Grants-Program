@@ -14,7 +14,6 @@ module.exports = {
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'ignore',
   onBrokenAnchors: 'warn',
-  onBrokenInternalLinks: 'warn',
   favicon: 'img/favicon-32x32.png',
   organizationName: 'w3f', // Usually your GitHub org/user name.
   trailingSlash: false,
