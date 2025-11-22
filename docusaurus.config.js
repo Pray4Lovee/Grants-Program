@@ -11,8 +11,9 @@ module.exports = {
   tagline: 'Funding Software Development and Research Efforts related to Polkadot and Kusama',
   url: 'https://grants.web3.foundation',
   baseUrl: '/',
-  onBrokenLinks: 'warn',    // Revert back to 'throw' once initial release is up
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'ignore',
+  onBrokenAnchors: 'warn',
   favicon: 'img/favicon-32x32.png',
   organizationName: 'w3f', // Usually your GitHub org/user name.
   trailingSlash: false,
