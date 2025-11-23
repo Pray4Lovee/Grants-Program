@@ -1,39 +1,14 @@
-name: "CLA Assistant"
+name: CLA Assistant
 
 on:
-  issue_comment:
-    types: [created]
-  pull_request_target:
-    types: [opened, closed, synchronize]
-
-permissions:
-  actions: write
-  contents: write
-  pull-requests: write
-  statuses: write
+  pull_request:
+    types: [opened, synchronize]
 
 jobs:
-  CLAAssistant:
+  cla:
     runs-on: ubuntu-latest
     steps:
-      - name: "CLA Assistant"
-        if: >
-          github.event_name == 'pull_request_target' ||
-          (github.event.comment.body == 'recheck' ||
-           github.event.comment.body == 'I have read and hereby sign the Contributor License Agreement.')
-        uses: contributor-assistant/github-action@v2.3.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PERSONAL_ACCESS_TOKEN: ${{ secrets.CLA_PAT }}  # <--- replace with your PAT secret
+      - name: CLA Assistant
+        uses: cla-assistant/github-action@v2.3.0
         with:
-          path-to-signatures: 'signatures/version1/cla.json'
-          path-to-document: 'https://github.com/Pray4Lovee/Grants-Program/blob/master/docs/Support%20Docs/T%26Cs.md'
-          branch: 'master'
-          allowlist: Pray4Lovee, semuelle, takahser, Noc2, PieWol, keeganquigley, laboon, github-actions[bot]
-          remote-organization-name: Pray4Lovee
-          remote-repository-name: grants-cla
-          custom-notsigned-prcomment: >
-            Thank you for your submission! Please sign our [CLA](https://github.com/Pray4Lovee/Grants-Program/blob/master/docs/Support%20Docs/T%26Cs.md)
-            by posting "I have read and hereby sign the Contributor License Agreement." as a separate comment.
-          custom-pr-sign-comment: 'I have read and hereby sign the Contributor License Agreement.'
-          lock-pullrequest-aftermerge: false
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
