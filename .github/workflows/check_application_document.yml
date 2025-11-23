@@ -6,32 +6,53 @@ on:
     types: [opened, synchronize]
 
 jobs:
-  get_filename:
-    if: contains(github.event.pull_request.body, 'Project Abstract')
+  get_application_file:
+    name: Detect application file
     runs-on: ubuntu-latest
     outputs:
-      filename: ${{ steps.files.outputs.added }}
+      filename: ${{ steps.detect.outputs.single }}
     steps:
+      - uses: actions/checkout@v4
 
-      - name: Get application filename # We assume there's only one
-        id: 'files'
+      - name: Get changed application files
+        id: files
         uses: Ana06/get-changed-files@v2.0.0
         with:
           filter: 'applications/*.md'
-          format: 'csv'
+          format: 'json'
 
-  parse_document:
-    needs: get_filename
-    if: needs.get_filename.outputs.filename
+      - name: Select single application file
+        id: detect
+        run: |
+          FILES=$(echo '${{ steps.files.outputs.added }}' | jq -r '.[]?')
+          COUNT=$(echo "$FILES" | wc -l)
+
+          if [ "$COUNT" -eq 0 ]; then
+            echo "No application file detected."
+            echo "single=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if [ "$COUNT" -gt 1 ]; then
+            echo "Multiple application files detected. Please include only one."
+            exit 1
+          fi
+
+          echo "single=$(echo "$FILES")" >> $GITHUB_OUTPUT
+
+  parse_application:
+    name: Parse document
+    needs: get_application_file
+    if: ${{ needs.get_application_file.outputs.filename != '' }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
       issues: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
       - name: Parse application file
-        id: grant_parser
-        uses: w3f/parse-grant-application-action@master
+        id: parser
+        uses: w3f/parse-grant-application-action@v1
         with:
-          path: "${{ github.workspace }}/${{ needs.get_filename.outputs.filename }}"
+          path: "${{ github.workspace }}/${{ needs.get_application_file.outputs.filename }}"
