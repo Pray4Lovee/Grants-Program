@@ -7,24 +7,36 @@ on:
 
 jobs:
   build:
-    if:  github.repository_owner == 'w3f'
+    if: github.repository_owner == 'w3f'
     name: build and deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - uses: actions/checkout@v4
+
+      - name: Cache Node modules
+        uses: actions/cache@v3
         with:
-          fetch-depth: 0
+          path: ~/.yarn/cache
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
       - name: Publish
         run: |
           git config --global user.email "grants-deployer@users.noreply.github.com"
           git config --global user.name "grants-deployer"
           echo "machine github.com login grants-deployer password ${{ secrets.ACCESS_KEY }}" > ~/.netrc
-          yarn && yarn build && GIT_USER=grants-deployer PUBLISHING=true yarn deploy
-      - if: ${{ failure() }}
+          yarn install
+          yarn build
+          GIT_USER=grants-deployer PUBLISHING=true yarn deploy
+
+      - if: ${{ always() && failure() }}
         uses: fadenb/matrix-chat-message@v0.0.6
         with:
           homeserver: 'matrix.web3.foundation'
