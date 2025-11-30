@@ -1,14 +1,46 @@
-name: CLA Assistant
+name: "CLA Assistant"
 
 on:
-  pull_request:
-    types: [opened, synchronize]
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write          # needed to commit the cla.json file
+  pull-requests: write     # needed to comment on PRs
+  statuses: write          # needed to set commit status
 
 jobs:
   cla:
     runs-on: ubuntu-latest
     steps:
-      - name: CLA Assistant
-        uses: cla-assistant/github-action@v2.3.0
+      - name: "CLA Assistant"
+        uses: contributor-assistant/github-action@v2.4.1   # latest safe version as of Nov 2025
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      # only default token
+          # No PERSONAL_ACCESS_TOKEN at all
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          # Store signatures in this repo (standard location)
+          path-to-signatures: "signatures/version1/cla.json"
+
+          # Link to YOUR own CLA document (create it if you don’t have one yet)
+          path-to-document: "https://github.com/Pray4Lovee/Grants-Program/blob/main/CLA.md"
+
+          # Branch where signatures are stored (use main or master)
+          branch: "main
+
+          # People who never have to sign (you + bots)
+          allowlist: Pray4Lovee,github-actions[bot],dependabot[bot],dependabot-preview[bot]
+
+          # Optional nicer messages
+          custom-notsigned-prcomment: |
+            Thank you for your pull request!  
+            Before we can merge it, please sign our Contributor License Agreement by commenting below with:
+
+            `I have read and agree to the CLA`
+
+          custom-pr-sign-comment: "I have read and agree to the CLA"
+
+          # Lock the PR after merge so nobody re-uses it (recommended)
+          lock-pullrequest-aftermerge: true
