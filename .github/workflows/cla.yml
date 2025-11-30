@@ -7,9 +7,9 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
-  contents: write      # to commit signatures
-  pull-requests: write # to comment on PRs
-  statuses: write      # to set commit status (green/red check)
+  contents: write
+  pull-requests: write
+  statuses: write
 
 jobs:
   cla:
@@ -20,26 +20,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          # Store signatures locally in this repository (this is the safe default)
           path-to-signatures: "signatures/version1/cla.json"
-
-          # Your own CLA document (create CLA.md in repo root if you don’t have one yet)
           path-to-document: "https://github.com/Pray4Lovee/Grants-Program/blob/main/CLA.md"
-
-          # Branch where the signatures file lives
-          branch: "main"
-
-          # Users/bots that never need to sign
+          branch: "main
           allowlist: Pray4Lovee,github-actions[bot],dependabot[bot],dependabot-preview[bot]
-
-          # Friendly messages
           custom-notsigned-prcomment: |
             Thank you for your submission!  
             Before we can review it, please sign our Contributor License Agreement by adding a new comment with exactly this text:
 
             `I have read and agree to the CLA`
-
           custom-pr-sign-comment: "I have read and agree to the CLA"
-
-          # Optional: lock PR after merge to prevent reuse
           lock-pullrequest-aftermerge: true
