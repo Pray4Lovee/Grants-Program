@@ -22,7 +22,7 @@ jobs:
         with:
           path-to-signatures: "signatures/version1/cla.json"
           path-to-document: "https://github.com/Pray4Lovee/Grants-Program/blob/main/CLA.md"
-          branch: "main
+          branch: "main"
           allowlist: Pray4Lovee,github-actions[bot],dependabot[bot],dependabot-preview[bot]
           custom-notsigned-prcomment: |
             Thank you for your submission!  
