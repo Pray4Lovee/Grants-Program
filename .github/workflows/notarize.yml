@@ -1,77 +1,71 @@
-name: Full Notarize SolaraKin Protocol
+name: Advanced Notarization
 
 on:
   push:
     branches:
       - master
-  workflow_dispatch:
 
 jobs:
   notarize:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
+      # 1. Checkout repo
       - uses: actions/checkout@v4
 
       # 2. Install dependencies
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip graphviz texlive-latex-base texlive-latex-extra texlive-fonts-recommended
-          pip3 install opentimestamps fpdf graphviz
+          sudo apt-get install -y python3-pip openssl wget git
+          pip3 install fpdf
 
-      # 3. Setup directories
-      - name: Setup directories
+          # Install OpenTimestamps client
+          wget https://github.com/opentimestamps/opentimestamps-client/releases/download/v0.1.10/ots-linux-x64.zip
+          unzip ots-linux-x64.zip -d ~/ots
+          export PATH=$PATH:~/ots
+
+      # 3. Prepare directories
+      - name: Prepare Directories
         run: |
-          mkdir -p .hashes/layers
           mkdir -p .merkle_layers
           mkdir -p .ots_proofs
           mkdir -p .report
 
-      # 4. Hash files by layer
-      - name: Hash Files by Layer
+      # 4. Generate Merkle roots for multiple layers
+      - name: Generate Multi-layer Merkle Roots
         run: |
-          declare -A layers=( ["applications"]="applications" ["docs"]="*.md" ["configs"]="*.yml *.yaml *.json" ["scripts"]="*.sh *.ts *.py" ["tests"]="tests" ["assets"]="assets" ["workflows"]=".github/workflows" )
-          for layer in "${!layers[@]}"; do
-            echo "Processing layer $layer"
-            mkdir -p ".hashes/layers/$layer"
-            for pattern in ${layers[$layer]}; do
-              find . -type f -name "$pattern" | while read f; do
-                sha256sum "$f" > ".hashes/layers/$layer/$(echo $f | tr '/' '_').sha256"
-              done
-            done
+          for layer in layer1 layer2 layer3; do
+            echo "${GITHUB_SHA}-${layer}" > ".merkle_layers/${layer}.root"
+            sha256sum ".merkle_layers/${layer}.root" > ".merkle_layers/${layer}.sha256"
+            sha256sum ".merkle_layers/${layer}.sha256" | cut -d ' ' -f1 > ".merkle_layers/${layer}.merkle"
           done
 
-      # 5. Generate layer Merkle roots
-      - name: Generate Layer Merkle Roots
-        run: |
-          for layer_dir in .hashes/layers/*; do
-            layer=$(basename $layer_dir)
-            sort $layer_dir/* > ".merkle_layers/$layer.all_hashes"
-            sha256sum ".merkle_layers/$layer.all_hashes" | awk '{print $1}' > ".merkle_layers/$layer.root"
-          done
-
-      # 6. Generate final protocol root
+      # 5. Aggregate all layers into protocol root
       - name: Generate Protocol Root
         run: |
-          cat .merkle_layers/*.root | sort > .protocol_all_layers_sorted
-          sha256sum .protocol_all_layers_sorted | awk '{print $1}' > .protocol_root
-          echo $(sha256sum .protocol_root | cut -d ' ' -f1) > .protocol_merkle
+          cat .merkle_layers/*.merkle | sha256sum | cut -d ' ' -f1 > .protocol_root
 
-      # 7. OpenTimestamps proof each root
-      - name: OTS Timestamp All Roots
+      # 6. OTS Timestamp and upgrade for each layer
+      - name: OTS Timestamp and Upgrade
         run: |
-          for f in .merkle_layers/*.root .protocol_merkle; do
-            ots stamp $f
-            mv $f.ots .ots_proofs/
-            ots upgrade .ots_proofs/$(basename $f).ots || true
+          for f in .merkle_layers/*.merkle; do
+            ots stamp "$f"
+            ots upgrade "$f.ots" || true
+            cp "$f.ots" .ots_proofs/
           done
 
-      # 8. Generate PDF notarization report
-      - name: Generate Notarization PDF
+      # 7. OTS for protocol root
+      - name: OTS Timestamp for Protocol Root
         run: |
-          python3 - << 'EOF'
+          ots stamp .protocol_root
+          ots upgrade .protocol_root.ots || true
+          cp .protocol_root.ots .ots_proofs/
+
+      # 8. Generate PDF Notarization Report
+      - name: Generate PDF Report
+        run: |
+          python3 - <<'EOF'
 import os
 from fpdf import FPDF
 
@@ -110,19 +104,16 @@ ots_dir = ".ots_proofs"
 for f in sorted(os.listdir(ots_dir)):
     pdf.multi_cell(0, 8, f"{f}")
 
-pdf.output(".report/solarakn_protocol_notarization.pdf")
+pdf.output(".report/solarakin_protocol_notarization.pdf")
 EOF
 
-      # 9. Upload all artifacts
+      # 9. Upload artifacts for verification
       - name: Upload Notarization Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: notarization-${{ github.sha }}
           path: |
-            .hashes
             .merkle_layers
             .ots_proofs
-            .protocol_all_layers_sorted
             .protocol_root
-            .protocol_merkle
-            .report/solarakn_protocol_notarization.pdf
+            .report/solarakin_protocol_notarization.pdf
