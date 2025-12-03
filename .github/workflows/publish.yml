@@ -7,29 +7,34 @@ on:
 
 jobs:
   build:
-    if: github.repository_owner == 'w3f'
+    if: ${{ github.repository_owner == 'w3f' }}
     name: build and deploy
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Install
+        run: yarn --frozen-lockfile
 
-      - name: Publish
-        run: |
-          git config --global user.email "grants-deployer@users.noreply.github.com"
-          git config --global user.name "grants-deployer"
-          echo "machine github.com login grants-deployer password ${{ secrets.ACCESS_KEY }}" > ~/.netrc
-          yarn && yarn build && GIT_USER=grants-deployer PUBLISHING=true yarn deploy
+      - name: Build
+        run: yarn build
 
-      - if: ${{ failure() }}
+      - name: Deploy
+        env:
+          GIT_USER: grants-deployer
+          GITHUB_TOKEN: ${{ secrets.ACCESS_KEY }}
+          PUBLISHING: true
+        run: yarn deploy
+
+      - name: Notify failure
+        if: ${{ failure() }}
         uses: fadenb/matrix-chat-message@v0.0.6
         with:
           homeserver: 'matrix.web3.foundation'
