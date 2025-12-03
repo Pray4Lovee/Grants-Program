@@ -113,7 +113,7 @@ EOF
         with:
           name: notarization-${{ github.sha }}
           path: |
-            .merkle_layers
-            .ots_proofs
+            .merkle_layers/
+            .ots_proofs/
             .protocol_root
             .report/solarakin_protocol_notarization.pdf
