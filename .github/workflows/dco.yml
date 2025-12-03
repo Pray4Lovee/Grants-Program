@@ -1,0 +1,22 @@
+name: DCO Enforcement
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: DCO Check
+        uses: docker://ghcr.io/denisok94/dco-check:latest
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: ${{ failure() }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.setFailed("DCO Violation: You must sign commits with 'Signed-off-by: Name <Email>'")
