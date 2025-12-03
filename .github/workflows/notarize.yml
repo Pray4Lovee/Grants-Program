@@ -1,0 +1,32 @@
+name: Notarize Commit
+
+on:
+  push:
+
+jobs:
+  notarize:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Merkle Root
+        run: |
+          echo $GITHUB_SHA > .root
+          sha256sum .root > .root.sha256
+          echo $(sha256sum .root.sha256 | cut -d ' ' -f1) > .merkle
+
+      - name: OTS Timestamp
+        run: |
+          ots stamp .merkle
+          ots upgrade .merkle.ots || true
+
+      - name: Upload Proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: notarization-${{ github.sha }}
+          path: |
+            .root
+            .root.sha256
+            .merkle
+            .merkle.ots
