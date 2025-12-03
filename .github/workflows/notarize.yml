@@ -1,38 +1,63 @@
-name: Notarize Commit
+name: Notarize SolaraKin Protocol
 
 on:
   push:
+    branches:
+      - master
+  workflow_dispatch:
 
 jobs:
   notarize:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout the repo
       - uses: actions/checkout@v4
 
+      # Install OpenTimestamps CLI
       - name: Install OpenTimestamps client
         run: |
-          sudo apt update
-          sudo apt install -y python3-pip git
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
           pip3 install opentimestamps-client
 
+      # Create individual file hashes
+      - name: Create File Hashes
+        run: |
+          mkdir -p .hashes
+          find applications/ -type f -name "*" | while read file; do
+            sha256sum "$file" > ".hashes/$(echo $file | tr '/' '_').sha256"
+          done
+          # Add markdown/docs
+          find . -type f -name "*.md" | while read file; do
+            sha256sum "$file" > ".hashes/$(echo $file | tr '/' '_').sha256"
+          done
+          # Add configs / assets
+          find . -type f \( -name "*.json" -o -name "*.yml" -o -name "*.yaml" \) | while read file; do
+            sha256sum "$file" > ".hashes/$(echo $file | tr '/' '_').sha256"
+          done
+
+      # Combine all hashes into a single Merkle leaf
       - name: Create Merkle Root
         run: |
-          echo $GITHUB_SHA > .root
-          sha256sum .root > .root.sha256
-          echo $(sha256sum .root.sha256 | cut -d ' ' -f1) > .merkle
+          cat .hashes/*.sha256 | sort > .all_hashes_sorted
+          sha256sum .all_hashes_sorted > .root
+          echo $(sha256sum .root | cut -d ' ' -f1) > .merkle
 
+      # Timestamp the Merkle root with OTS
       - name: OTS Timestamp
         run: |
           ots stamp .merkle
           ots upgrade .merkle.ots || true
 
+      # Upload notarization artifacts
       - name: Upload Proof
         uses: actions/upload-artifact@v4
         with:
           name: notarization-${{ github.sha }}
           path: |
+            .hashes
+            .all_hashes_sorted
             .root
-            .root.sha256
             .merkle
             .merkle.ots
