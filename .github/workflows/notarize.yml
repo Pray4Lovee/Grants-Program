@@ -1,4 +1,4 @@
-name: Notarize SolaraKin Protocol
+name: Full Advanced Notarize SolaraKin Protocol
 
 on:
   push:
@@ -11,53 +11,118 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repo
+      # 1. Checkout repository
       - uses: actions/checkout@v4
 
-      # Install OpenTimestamps CLI
-      - name: Install OpenTimestamps client
+      # 2. Install dependencies
+      - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip
-          pip3 install opentimestamps-client
+          sudo apt-get install -y python3-pip graphviz texlive-latex-base texlive-latex-extra texlive-fonts-recommended
+          pip3 install opentimestamps fpdf graphviz
 
-      # Create individual file hashes
-      - name: Create File Hashes
+      # 3. Setup directories
+      - name: Setup directories
         run: |
-          mkdir -p .hashes
-          find applications/ -type f -name "*" | while read file; do
-            sha256sum "$file" > ".hashes/$(echo $file | tr '/' '_').sha256"
-          done
-          # Add markdown/docs
-          find . -type f -name "*.md" | while read file; do
-            sha256sum "$file" > ".hashes/$(echo $file | tr '/' '_').sha256"
-          done
-          # Add configs / assets
-          find . -type f \( -name "*.json" -o -name "*.yml" -o -name "*.yaml" \) | while read file; do
-            sha256sum "$file" > ".hashes/$(echo $file | tr '/' '_').sha256"
-          done
+          mkdir -p .hashes/layers
+          mkdir -p .merkle_layers
+          mkdir -p .ots_proofs
+          mkdir -p .report
 
-      # Combine all hashes into a single Merkle leaf
-      - name: Create Merkle Root
+      # 4. Hash files by layer
+      - name: Hash Files by Layer
         run: |
-          cat .hashes/*.sha256 | sort > .all_hashes_sorted
-          sha256sum .all_hashes_sorted > .root
-          echo $(sha256sum .root | cut -d ' ' -f1) > .merkle
+          declare -A layers=( ["applications"]="applications" ["docs"]="*.md" ["configs"]="*.yml *.yaml *.json" ["scripts"]="*.sh *.ts *.py" ["tests"]="tests" ["assets"]="assets" ["workflows"]=".github/workflows" )
+          for layer in "${!layers[@]}"; do
+            echo "Processing layer $layer"
+            mkdir -p ".hashes/layers/$layer"
+            for pattern in ${layers[$layer]}; do
+              find . -type f -name "$pattern" | while read f; do
+                sha256sum "$f" > ".hashes/layers/$layer/$(echo $f | tr '/' '_').sha256"
+              done
+            done
+          done
 
-      # Timestamp the Merkle root with OTS
-      - name: OTS Timestamp
+      # 5. Generate layer Merkle roots
+      - name: Generate Layer Merkle Roots
         run: |
-          ots stamp .merkle
-          ots upgrade .merkle.ots || true
+          for layer_dir in .hashes/layers/*; do
+            layer=$(basename $layer_dir)
+            sort $layer_dir/* > ".merkle_layers/$layer.all_hashes"
+            sha256sum ".merkle_layers/$layer.all_hashes" | awk '{print $1}' > ".merkle_layers/$layer.root"
+          done
 
-      # Upload notarization artifacts
-      - name: Upload Proof
+      # 6. Generate final protocol root
+      - name: Generate Protocol Root
+        run: |
+          cat .merkle_layers/*.root | sort > .protocol_all_layers_sorted
+          sha256sum .protocol_all_layers_sorted | awk '{print $1}' > .protocol_root
+          echo $(sha256sum .protocol_root | cut -d ' ' -f1) > .protocol_merkle
+
+      # 7. OpenTimestamps proof each root
+      - name: OTS Timestamp All Roots
+        run: |
+          for f in .merkle_layers/*.root .protocol_merkle; do
+            ots stamp $f
+            mv $f.ots .ots_proofs/
+            ots upgrade .ots_proofs/$(basename $f).ots || true
+          done
+
+      # 8. Generate PDF notarization report
+      - name: Generate Notarization PDF
+        run: |
+          python3 - << 'EOF'
+import os
+from fpdf import FPDF
+
+pdf = FPDF()
+pdf.add_page()
+pdf.set_font("Arial", 'B', 16)
+pdf.cell(0, 10, "SolaraKin Protocol Notarization Report", ln=1, align='C')
+
+pdf.set_font("Arial", '', 12)
+pdf.ln(5)
+pdf.cell(0, 10, f"Commit SHA: {os.environ.get('GITHUB_SHA')}", ln=1)
+pdf.cell(0, 10, f"Branch: master", ln=1)
+pdf.ln(5)
+
+pdf.set_font("Arial", 'B', 14)
+pdf.cell(0, 10, "Layer Merkle Roots", ln=1)
+pdf.set_font("Arial", '', 12)
+merkle_dir = ".merkle_layers"
+for f in sorted(os.listdir(merkle_dir)):
+    if f.endswith(".root"):
+        root_hash = open(os.path.join(merkle_dir,f)).read().strip()
+        pdf.multi_cell(0, 8, f"{f}: {root_hash}")
+
+pdf.ln(5)
+pdf.set_font("Arial", 'B', 14)
+pdf.cell(0, 10, "Protocol Root", ln=1)
+pdf.set_font("Arial", '', 12)
+protocol_root = open(".protocol_root").read().strip()
+pdf.multi_cell(0, 8, f"Protocol Root Hash: {protocol_root}")
+
+pdf.ln(5)
+pdf.set_font("Arial", 'B', 14)
+pdf.cell(0, 10, "OTS Proofs", ln=1)
+pdf.set_font("Arial", '', 12)
+ots_dir = ".ots_proofs"
+for f in sorted(os.listdir(ots_dir)):
+    pdf.multi_cell(0, 8, f"{f}")
+
+pdf.output(".report/solarakn_protocol_notarization.pdf")
+EOF
+
+      # 9. Upload all artifacts
+      - name: Upload Notarization Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: notarization-${{ github.sha }}
           path: |
             .hashes
-            .all_hashes_sorted
-            .root
-            .merkle
-            .merkle.ots
+            .merkle_layers
+            .ots_proofs
+            .protocol_all_layers_sorted
+            .protocol_root
+            .protocol_merkle
+            .report/solarakn_protocol_notarization.pdf
