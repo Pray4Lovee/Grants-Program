@@ -1,189 +1,188 @@
-# Name of your Project
+# x402 / SoulSync Protocol Retroactive Contribution Proposal
 
-> [!NOTE]
-> This document will be part of the terms and conditions of your agreement and, therefore, needs to contain all the required information about the project. Don't remove any of the mandatory parts presented in bold letters or as headlines (except for the title)! Lines starting with a `>` (such as this one) should be removed. Please use markdown instead of HTML (e.g., `![](image.png)` instead of `<img>`).
->
-> See the [Grants Program Process](https://grants.web3.foundation/docs/process) on how to submit a proposal.
+* **Team Name:** Pray4Love Labs
+* **Payment Details:**
 
-- **Team Name:** Legal name of your team (e.g. JsonCorp)
-- **Payment Details:**
-  - **DOT**: For the **DOT** compensation, please provide a Polkadot address (e.g. 15oF4...).
-  - **Payment**: For the **USDC** portion of the payment, please provide a Polkadot AssetHub address and the currency (e.g. 15oF4... (USDC)). 
-- **[Level](https://grants.web3.foundation/docs/Introduction/levels):** 1, 2 or 3
+  * **DOT:** 157h3rC3yeahXdNKW1brxhAiADN8iWrE593HeJvwEooPtWAZ
+  * **Payment:** 157h3rC3yeahXdNKW1brxhAiADN8iWrE593HeJvwEooPtWAZ (USDC)
+* **Level:** 3 (Unlimited)
 
-> [!IMPORTANT]
-> *The combination of your GitHub account submitting the application and the payment address above will be your unique identifier during the program. Please keep them safe.*
+---
 
 ## Project Overview :page_facing_up:
 
-If this application is in response to an RFP, please indicate this on the first line of this section.
+This application is a **retroactive grant request** covering substantial open-source infrastructure contributions delivered **from June 2025 to the present**. The work described below has already been researched, designed, implemented, tested, and partially deployed, and now requires retroactive compensation in order to sustain continued development, maintenance, documentation, and ecosystem support.
 
-If this is an application for a follow-up grant (the continuation of an earlier, successful W3F grant), please provide the name and/or pull request of said grant on the first line of this section.
+The project centers around the **x402 / SoulSync Protocol stack**, a deeply layered execution, signing, verification, and attestation framework for the Polkadot ecosystem. The system enables **secure autonomous agent operation**, **offline-first signing**, **ephemeral key management**, **zk-based verification**, and **runtime-level enforcement** across Substrate-based chains.
 
-### Overview
+These contributions directly address long-standing gaps in Polkadot infrastructure: safe offline workflows, deterministic runtime execution guarantees, replay-resistant signing, multi-token payments, and end-to-end (E2E) verifiability across tooling, SDKs, and runtimes.
 
-Please provide the following:
+---
 
-- If the name of your project is not descriptive, a tagline (one sentence summary).
-- A brief description of your project.
-- An indication of how your project relates to / integrates into Substrate / Polkadot / Kusama.
-- An indication of why your team is interested in creating this project.
+## Scope of Retroactive Contributions (June → Present)
 
-### Project Details
+Delivered work includes, but is not limited to:
 
-We expect the teams to already have a solid idea about your project's expected final state. Therefore, we ask the teams to submit (where relevant):
+* **SoulSyncProof zk-layer** for identity, mood, biometric, and agent attestation
+* **KinKey ephemeral wallet system** for autonomous agents and offline signing
+* **Runtime pallets** enabling trust, cross-chain messaging, payments, assets, and nonce safety
+* **x402 attestation format** for cross-domain execution verification
+* **Rust and JS/TS SDKs** for application and agent developers
+* **CLI tooling** for offline payload generation, signing, simulation, and debugging
+* **Facilitator services** for multi-token payments (DOT, USDC, USDT)
+* **End-to-end execution templates** for real-world deployment
 
-- Mockups/designs of any UI components
-- Data models / API specifications of the core functionality
-- An overview of the technology stack to be used
-- Documentation of core components, protocols, architecture, etc. to be deployed
-- PoC/MVP or other relevant prior work or research on the topic
-- What your project is *not* or will *not* provide or implement
-  - This is a place for you to manage expectations and clarify any limitations that might not be obvious
+All work is open-source, reproducible, and verifiable via repository history, tests, documentation, and security research artifacts.
 
+---
 
-Things that shouldn’t be part of the application (see also our [FAQ](../docs/faq.md)):
+## Project Details
 
-- The (future) tokenomics of your project
-- For non-infrastructure projects—deployment and hosting costs, maintenance or audits
-- Business-oriented activities (marketing, business planning), events or outreach
+### Architecture Overview (All Micro-Layers)
 
-### Ecosystem Fit
+The stack is explicitly decomposed into **independent micro-layers**, each designed for isolation, auditability, and deterministic behavior:
 
-Help us locate your project in the Polkadot/Substrate/Kusama landscape and what problems it tries to solve by answering each of these questions:
+1. **Runtime Layer**
 
-- Where and how does your project fit into the ecosystem?
-- Who is your target audience (parachain/dapp/wallet/UI developers, designers, your own user base, some dapp's userbase, yourself)?
-- What need(s) does your project meet?
-- How did you identify these needs? Please provide evidence in the form of (scientific) articles, forum discussions, case studies, or raw data.
-- Are there any other projects similar to yours in the Substrate / Polkadot / Kusama ecosystem?
-  - If so, how is your project different? Please identify and assess any projects addressing the same need and explain how your project is distinct. Feel free to include applicable research data, statistics, or metrics.
-  - If not, please indicate why such a project might not have been possible, successful, or attempted. 
-- Are there any projects similar to yours in related ecosystems? 
+   * Substrate pallets enforcing trust, payments, assets, nonce tracking, and cross-chain messaging
+   * Explicit origin, weight, and call-encoding validation
+   * Governance- and batch-safe execution paths
+
+2. **Execution & Simulation Layer**
+
+   * Deterministic extrinsic and block simulation
+   * Runtime-version–aware execution harnesses
+   * Failure-mode classification and tracing
+
+3. **Offline Signing Layer**
+
+   * Unsigned payload construction without RPC dependency
+   * Deterministic SCALE encoding guarantees
+   * Air-gapped and file-based signing workflows
+   * Domain-separated signature contexts
+
+4. **KinKey Ephemeral Wallet Layer**
+
+   * Rotating keys for agents and services
+   * Replay-resistant signing and nonce binding
+   * CLI and SDK support for lifecycle management
+
+5. **SoulSyncProof zk-Layer**
+
+   * zk-verifiers for identity, mood, biometric, and authorization proofs
+   * Runtime-integrated verification hooks
+   * zk-proof benchmarking and constraints analysis
+
+6. **x402 Attestation Layer**
+
+   * Structured execution attestations
+   * Cross-domain message verification
+   * Toolchain and runtime fingerprinting
+   * Replay and mismatch detection
+
+7. **SDK & Tooling Layer**
+
+   * JS/TS SDK for Node, server, and agent frameworks
+   * Rust SDK for backend and middleware integration
+   * CLI tools for debugging, simulation, and inspection
+
+8. **E2E Verification Layer**
+
+   * Full pipeline validation from payload → signature → inclusion → runtime verification
+   * Deterministic test vectors
+   * Dockerized reproducible environments
+
+---
+
+### Technology Stack
+
+* **Blockchain Framework:** Substrate / Polkadot / Kusama
+* **Languages:** Rust, TypeScript, JavaScript
+* **Cryptography:** sr25519, ed25519, zk-SNARKs, zk-STARKs
+* **SDKs:** Polkadot.js, subxt
+* **Testing:** Cargo test, property-based testing, Mocha/TS
+* **Packaging:** Docker, Docker Compose
+
+---
+
+## Retroactive Milestones & Cost Breakdown
+
+| Month | FTE | Cost (USD) | Layer / Component      | Delivered Output                           |
+| ----: | --: | ---------: | ---------------------- | ------------------------------------------ |
+|  June |   1 |     25,000 | SoulSyncProof zk-layer | Core zk-verifiers, tests, runtime hooks    |
+|  June |   1 |     25,000 | KinKey Wallet          | Ephemeral key rotation, CLI, signing flows |
+|  July |   1 |     25,000 | Runtime Pallets        | Trust, cross-chain, payments               |
+|  July |   1 |     25,000 | SDK Foundations        | JS/TS + Rust SDK scaffolding               |
+|   Aug |   1 |     25,000 | Offline Signing        | Payload builders, replay protection        |
+|   Aug |   1 |     25,000 | Runtime Integration    | zk + pallet integration                    |
+|   Sep |   1 |     25,000 | AssetHub Integration   | Multi-token (DOT/USDC/USDT)                |
+|   Sep |   1 |     25,000 | Facilitator Service    | REST APIs, batching, nonce tracking        |
+|   Oct |   1 |     25,000 | x402 Layer             | Cross-domain attestation format            |
+|   Oct |   1 |     25,000 | SDK Finalization       | Docs, tests, packaging                     |
+|   Nov |   1 |     25,000 | Runtime Hardening      | Mainnet-ready safety checks                |
+|   Nov |   1 |     25,000 | Documentation          | E2E guides and tutorials                   |
+|   Dec |   1 |     25,000 | Templates              | Deployment & E2E templates                 |
+|   Dec |   1 |     25,000 | Production Readiness   | Monitoring, retries, safeguards            |
+
+**Total Retroactive Cost:** **$350,000 USD**
+
+---
+
+## Ecosystem Fit
+
+* **Placement:** Core infrastructure & developer tooling
+* **Target Users:** Parachain teams, dapp developers, wallet developers, autonomous agent frameworks
+* **Problem Solved:** Offline signing risk, replay attacks, runtime mismatch, multi-token complexity
+* **Differentiation:** Only solution combining zk-attestation, ephemeral wallets, runtime enforcement, and E2E verification
+
+---
 
 ## Team :busts_in_silhouette:
 
-> [!IMPORTANT]
-> Please note that the data provided in this section is for administrative and informational purposes only. All beneficiaries of a grant must also be listed in the KYC/KYB process during the application phase. See our [FAQ](https://grants.web3.foundation/docs/faq#what-is-kyckyb-and-why-do-i-have-to-provide-this-data) for more info.
+### Members
 
-### Team members
-
-- Name of team leader
-- Names of team members
+* **Lead Developer:** Pray4Love1
+* **Contributor:** Pray4Lovee
 
 ### Contact
 
-- **Contact Name:** Full name of the contact person in your team
-- **Contact Email:** Contact email (e.g. john@duo.com)
-- **Website:** Your website
+* **Email:** [totalwine2337@gmail.com](mailto:totalwine2337@gmail.com)
+* **GitHub:** [https://github.com/Pray4Love1](https://github.com/Pray4Love1)
 
 ### Legal Structure
 
-- **Registered Address:** Address of your registered legal entity, if available. Please keep it in a single line. (e.g. High Street 1, London LK1 234, UK)
-- **Registered Legal Entity:** Name of your registered legal entity, if available. (e.g. Duo Ltd.)
+* Independent open-source contributors (no registered entity)
 
-### Team's experience
+### Experience (2025–Present)
 
-Please describe the team's relevant experience. If your project involves development work, we would appreciate it if you singled out a few interesting projects or contributions made by team members in the past.
+* Substrate runtime engineering
+* Governance & batch execution analysis
+* zk-proof research and integration
+* Offline signing and security tooling
+* Cross-chain execution verification
 
-If anyone on your team has applied for a grant at the Web3 Foundation previously, please list the name of the project and legal entity here.
-
-### Team Code Repos
-
-- https://github.com/{your_organisation}/{project_1}
-- https://github.com/{your_organisation}/{project_2}
-
-Please also provide the GitHub accounts of all team members. If they contain no activity, references to projects hosted elsewhere or live are also fine.
-
-- https://github.com/{team_member_1}
-- https://github.com/{team_member_2}
-
-### Team LinkedIn Profiles (if available)
-
-- https://www.linkedin.com/{person_1}
-- https://www.linkedin.com/{person_2}
-
+---
 
 ## Development Status :open_book:
 
-If you've already started implementing your project or it is part of a larger repository, please provide a link and a description of the code here. In any case, please provide some documentation on the research and other work you have conducted before applying. This could be:
+* Functional runtime pallets
+* Working offline signing and CLI tools
+* zk-verification prototypes integrated
+* Deterministic E2E test environments
 
-- links to improvement proposals or [RFPs](https://grants.web3.foundation/docs/rfps) (requests for proposal),
-- academic publications relevant to the problem,
-- links to your research diary, blog posts, articles, forum discussions or open GitHub issues,
-- references to conversations you might have had related to this project with anyone from the Web3 Foundation,
-- previous interface iterations, such as mock-ups and wireframes.
-
-## Development Roadmap :nut_and_bolt:
-
-This section should break the development roadmap down into milestones and deliverables. To assist you in defining it, we have created a document with examples for some grant categories [here](../docs/Support%20Docs/grant_guidelines_per_category.md). Since these will be part of the agreement, it helps to describe *the functionality we should expect in as much detail as possible*, plus how we can verify and test that functionality. Whenever milestones are delivered, we refer to this document to ensure that everything has been delivered as expected.
-
-Below we provide an **example roadmap**. In the descriptions, it should be clear how your project is related to Substrate, Kusama or Polkadot. We *recommend* that teams structure their roadmap as 1 milestone ≈ 1 month.
-
-> [!CAUTION]
-> If any of your deliverables are based on somebody else's work, make sure you work and publish *under the terms of the license* of the respective project and that you **highlight this fact in your milestone documentation** and in the source code if applicable! **Projects that submit other people's work without proper attribution will be immediately terminated.**
-
-### Overview
-
-- **Total Estimated Duration:** Duration of the whole project (e.g. 2 months)
-- **Full-Time Equivalent (FTE):**  Average number of full-time employees working on the project throughout its duration (see [Wikipedia](https://en.wikipedia.org/wiki/Full-time_equivalent), e.g. 2 FTE)
-- **Total Costs:** Requested amount in USD for the whole project (e.g. 12,000 USD). Note that the acceptance criteria and additional benefits vary depending on the [level](../README.md#level_slider-levels) of funding requested.
-- **DOT %:** Percentage of Total Costs to be paid in (vested) DOT (≥ 50%)
-
-### Milestone 1 Example — Basic functionality
-
-- **Estimated duration:** 1 month
-- **FTE:**  1,5
-- **Costs:** 8,000 USD
-
-> [!NOTE]
-> **The default deliverables 0a-0d below are mandatory for all milestones**, and deliverable 0e at least for the last one.
-
-| Number | Deliverable | Specification |
-| -----: | ----------- | ------------- |
-| **0a.** | License | Apache 2.0 / GPLv3 / MIT / Unlicense. See the [delivery guidelines](https://grants.web3.foundation/docs/Support%20Docs/milestone-deliverables-guidelines#license) for details. |
-| **0b.** | Documentation | We will provide both **inline documentation** of the code and a basic **tutorial** that explains how a user can (for example) spin up one of our Substrate nodes and send test transactions, which will show how the new functionality works. See the [delivery guidelines](https://grants.web3.foundation/docs/Support%20Docs/milestone-deliverables-guidelines#documentation) for details. |
-| **0c.** | Testing and Testing Guide | Core functions will be fully covered by comprehensive unit tests to ensure functionality and robustness. In the guide, we will describe how to run these tests. See the [delivery guidelines](https://grants.web3.foundation/docs/Support%20Docs/milestone-deliverables-guidelines#testing-guide) for details. |
-| **0d.** | Docker | We will provide a Dockerfile(s) that can be used to test all the functionality delivered with this milestone. |
-| 0e. | Article | We will publish an **article**/workshop that explains [...] (what was done/achieved as part of the grant). (Content, language, and medium should reflect your target audience described above.) |
-| 1. | Substrate module: X | We will create a Substrate module that will... (Please list the functionality that will be implemented for the first milestone. You can refer to details provided in previous sections.) |
-| 2. | Substrate module: Y | The Y Substrate module will... |
-| 3. | Substrate module: Z | The Z Substrate module will... |
-| 4. | Substrate chain | Modules X, Y & Z of our custom chain will interact in such a way... (Please describe the deliverable here as detailed as possible) |
-| 5. | Library: ABC | We will deliver a JS library that will implement the functionality described under "ABC Library" |
-| 6. | Smart contracts: ... | We will deliver a set of ink! smart contracts that will...
-
-
-### Milestone 2 Example — Additional features
-
-- **Estimated Duration:** 1 month
-- **FTE:**  1,5
-- **Costs:** 8,000 USD
-
-...
-
+---
 
 ## Future Plans
 
-Please include here
+* Continue maintaining and hardening the stack
+* Expand x402 adoption and tooling
+* Support PPL and **Aegis Ultra** integrations
+* Ongoing documentation, audits, and ecosystem support
 
-- how you intend to finance the project's long-term maintenance and development,
-- how you intend to use, enhance, and promote your project in the short term, and
-- the team's long-term plans and intentions in relation to it.
-
-## Referral Program (optional) :moneybag:
-
-You can find more information about the program [here](https://grants.web3.foundation/docs/referral-program).
-
-- **Referrer:** Name of the Polkadot Ambassador or GitHub account of the Web3 Foundation grantee
-- **Payment Address:** Polkadot/Kusama (USDC) payment address. Please also specify the currency. (e.g. 15oF4... (USDC))
+---
 
 ## Additional Information :heavy_plus_sign:
 
-**How did you hear about the Grants Program?** Web3 Foundation Website / Medium / Twitter / Element / Announcement by another team / personal recommendation / etc.
-
-Here you can also add any additional information that you think is relevant to this application but isn't part of it already, such as:
-
-- Work you have already done.
-- If there are any other teams who have already contributed (financially) to the project.
-- Previous grants you may have applied for.
+* **Grant Type:** Retroactive compensation
+* **Previous Grants:** None
+* **Licensing:** Apache 2.0
