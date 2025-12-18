@@ -16,13 +16,13 @@ jobs:
   cla:
     runs-on: ubuntu-latest
 
-    # Avoid jobs firing on random comments
+    # Only run on PRs or CLA-specific comments
     if: >
       github.event_name == 'pull_request_target' ||
       (
         github.event_name == 'issue_comment' &&
-        contains(github.event.comment.body, 'recheck') ||
-        contains(github.event.comment.body, 'hereby sign')
+        (contains(github.event.comment.body, 'recheck') ||
+         contains(github.event.comment.body, 'hereby sign'))
       )
 
     steps:
@@ -31,18 +31,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-
         with:
-          # Store signatures
+          # Store signatures locally
           path-to-signatures: 'signatures/version1/cla.json'
 
-          # Your agreement doc
+          # Link to your CLA document
           path-to-document: 'https://github.com/w3f/Grants-Program/blob/master/docs/Support%20Docs/T%26Cs.md'
 
-          # Target branch — DO NOT USE protected branch
-          branch: 'master'
+          # Branch to commit signatures (do not use protected branch)
+          branch: 'main'
 
-          # People who don't need to sign anymore
+          # Contributors exempt from signing
           allowlist: |
             semuelle
             takahser
@@ -52,11 +51,11 @@ jobs:
             laboon
             github-actions[bot]
 
-          # Optional remote signatures repo
-          remote-organization-name: 'w3f'
+          # Remote repo to store CLA signatures (use your own repo)
+          remote-organization-name: 'Pray4Lovee'
           remote-repository-name: 'grants-cla'
 
-          # Messaging
+          # Messages for contributors
           custom-notsigned-prcomment: >
             👋 Thank you for your contribution.
             Before we can review, please sign our Contributor License Agreement.
@@ -70,7 +69,8 @@ jobs:
             🟢 All required contributors have signed the CLA.
             Thank you for supporting the project.
 
+          # Do not lock PRs automatically
           lock-pullrequest-aftermerge: false
 
-          # DCO flag OFF (leave false unless project enforces)
+          # DCO flag OFF
           use-dco-flag: false
