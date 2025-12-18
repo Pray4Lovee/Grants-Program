@@ -1,0 +1,76 @@
+name: CLA Assistant
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, closed]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+  statuses: write
+
+jobs:
+  cla:
+    runs-on: ubuntu-latest
+
+    # Only run on PRs or CLA-specific comments
+    if: >
+      github.event_name == 'pull_request_target' ||
+      (
+        github.event_name == 'issue_comment' &&
+        (contains(github.event.comment.body, 'recheck') ||
+         contains(github.event.comment.body, 'hereby sign'))
+      )
+
+    steps:
+      - name: Run CLA Assistant
+        uses: contributor-assistant/github-action@v2.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        with:
+          # Store signatures locally
+          path-to-signatures: 'signatures/version1/cla.json'
+
+          # Link to your CLA document
+          path-to-document: 'https://github.com/w3f/Grants-Program/blob/master/docs/Support%20Docs/T%26Cs.md'
+
+          # Branch to commit signatures (do not use protected branch)
+          branch: 'main'
+
+          # Contributors exempt from signing
+          allowlist: |
+            semuelle
+            takahser
+            Noc2
+            PieWol
+            keeganquigley
+            laboon
+            github-actions[bot]
+
+          # Remote repo to store CLA signatures (use your own repo)
+          remote-organization-name: 'Pray4Lovee'
+          remote-repository-name: 'grants-cla'
+
+          # Messages for contributors
+          custom-notsigned-prcomment: >
+            👋 Thank you for your contribution.
+            Before we can review, please sign our Contributor License Agreement.
+            Add this exact line as a comment:
+            **I have read and hereby sign the Contributor License Agreement.**
+
+          custom-pr-sign-comment: >
+            I have read and hereby sign the Contributor License Agreement.
+
+          custom-allsigned-prcomment: >
+            🟢 All required contributors have signed the CLA.
+            Thank you for supporting the project.
+
+          # Do not lock PRs automatically
+          lock-pullrequest-aftermerge: false
+
+          # DCO flag OFF
+          use-dco-flag: false
