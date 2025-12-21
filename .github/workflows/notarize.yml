@@ -23,7 +23,8 @@ jobs:
           # Install OpenTimestamps client
           wget https://github.com/opentimestamps/opentimestamps-client/releases/download/v0.1.10/ots-linux-x64.zip
           unzip ots-linux-x64.zip -d ~/ots
-          echo "PATH=$PATH:~/ots" >> $GITHUB_ENV
+          chmod +x ~/ots/ots
+          echo "$HOME/ots" >> $GITHUB_PATH  # Adds ots to PATH for all subsequent steps
 
       # 3. Prepare directories
       - name: Prepare Directories
